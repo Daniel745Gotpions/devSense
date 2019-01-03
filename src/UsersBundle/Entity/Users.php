@@ -4,6 +4,7 @@ namespace UsersBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use UsersBundle\Entity\hobbies;
+use UsersBundle\Entity\friends;
 use Symfony\Component\VarDumper\VarDumper;
 /**
  * Users
@@ -80,11 +81,23 @@ class Users
         if( is_null($this->id) || empty($this->id))
             return [];
 
-        $query = "SELECT * FROM hobbies WHERE userId=".$this->id;
+        $query = "SELECT * FROM hobbies WHERE userId = ".$this->id;
         $statement = $this->conn->getConnection()->prepare($query);
         $statement->execute();
         $result = $statement->fetchAll();
         return $result;
+    }
+
+    public function addFriend($friendId){
+        if( is_null($this->id) || empty($this->id))
+            return false;
+        $em = $this->getConn();
+        $newFriend = new friends();
+        $newFriend->setFriendId($friendId);
+        $newFriend->setMyId($this->id);
+        $em->persist($newFriend);
+        $em->flush();
+        return true;
     }
 
     /**

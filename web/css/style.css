@@ -26,3 +26,17 @@
     border: 1px #dcdcdc solid;
     margin-right: 15px;
 }
+.holderUser{
+    padding: 5px;
+    border-bottom: 1px #d8d8d8 solid;
+}
+.fa-plus{
+		cursor: pointer;
+		color: #3ab6f5;
+		float: right;
+}
+.fa-users{
+	
+	color:#2eaf28;
+	float: right;
+}
