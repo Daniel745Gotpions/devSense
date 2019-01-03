@@ -1,0 +1,77 @@
+<html>
+<head>
+	
+	
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+
+
+	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	
+</head>
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-4"></div>
+            <div class="col-lg-4 loginPanel" >
+                <h2 class="center-text">Login </h2>
+                <div class="alert alert-primary" role="alert"> </div> 
+                <form  id="loginForm">
+                <div class="form-group">
+                  <label for="username">User Name:</label>
+                  <input type="text" class="form-control" id="username" placeholder="Enter username" name="username">
+                  <p class="error">* Enter User Name</p>
+                </div>
+                <div class="form-group">
+                  <label for="password">Password:</label>
+                  <input type="password" class="form-control" id="password" placeholder="Enter password" name="password">
+                  <p class="error">* Enter Password</p>
+                </div>
+                <button type="submit" class="btn btn-default">Login</button>
+               </form>
+            </div>
+        </div>
+        <div class="col-lg-4"></div>
+    </div>
+    <script type="text/javascript">
+
+    	$(document).ready( function () {
+            $("#loginForm").on("submit",function(){
+                $(".error,.alert").hide();
+                let validation = 1;
+                const inputs = $(this).find('input');
+                for(var i=0;i<inputs.length ;i++){
+                    if(inputs[i].value == ''){
+                        $($(inputs[i]).siblings()[1]).show();
+                        validation = 0;
+                    }
+                }
+                
+                if(!validation){
+                    return false;
+                }
+
+                $.ajax({
+                    url:"{{path('loginLogic')}}",
+                    data:{
+                        username:$('#username').val(),
+                        password:$('#password').val()
+                    },
+                    dataType:'json',
+                    type:'post',
+                    success:function(data){
+                        if(data.status){
+                            location.replace("{{path('profile')}}");
+                        }else{
+                            $(".alert").html(data.message).show();
+                        }
+                    }
+                });
+                return false;
+            });
+		} );
+    </script>
+</body>
+</html>

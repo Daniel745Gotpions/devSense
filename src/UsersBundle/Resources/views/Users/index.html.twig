@@ -1,0 +1,75 @@
+<html>
+<head>
+	<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css
+">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+	<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+	<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+
+	<table id="table" class="display table" style="width:100%">
+        <thead>
+            <tr>
+            	<th>id</th>
+                <th>Name</th>
+                <th>rotationPeriod</th>
+                <th>orbitalPeriod</th>
+                <th>diameter</th>
+                <th>climate</th>
+                <th>gravity</th>
+                <th>terrain</th>
+                <th>surface_water</th>
+                <th>population</th>
+                <th>Edit</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+        	{% if data|length %}	
+        		{% for  item in data %}
+        			<tr>
+        				<td>{{ item.id }}</td>
+        				<td>{{ item.name }}</td>
+        				<td>{{ item.rotationPeriod }}</td>
+        				<td>{{ item.orbitalPeriod }}</td>
+        				<td>{{ item.diameter }}</td>
+        				<td>{{ item.climate }}</td>
+        				<td>{{ item.gravity }}</td>
+        				<td>{{ item.terrain }}</td>
+        				<td>{{ item.surfaceWater }}</td>
+        				<td>{{ item.population }}</td>
+        				<td> <a href="{{path('edit_user',{id:item.id})}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i></a> </td>
+        				<td> 
+        					{% if item.allowedDelete %}
+        					<i link="{{ path('delete_user',{id:item.id})}}" class="fa fa-trash" aria-hidden="true" style="color:#337ab7;cursor: pointer;"></i>
+        					{% else %}
+        						<i class="fa fa-lock" title="you can't remove me" aria-hidden="true"></i>
+        					{% endif %}
+
+        				</td>
+        			</tr>
+        		{% endfor %}	
+        	{% endif %}	
+        </tbody>
+        <tfoot>
+     
+    </table>
+    <script type="text/javascript">
+        
+        $(document).on('click',".fa-trash",function(){
+            var answer = confirm("Are you sure you want to delete the user ?");
+            if(answer){
+                var link = location.origin+$(this).attr('link');
+                window.location.replace(link);
+            }
+        });
+
+    	$(document).ready( function () {
+		    $('#table').DataTable();
+		} );
+    </script>
+</body>
+</html>

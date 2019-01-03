@@ -1,0 +1,28 @@
+.loginPanel{
+	border-radius: 5px;
+    padding: 10px;
+    background: #e8e8e8;
+    margin-top: 20px;
+    border: 1px #9c9c9c solid;
+}
+.center-text{
+	text-align: center;
+}
+.error{
+	color: red;
+	padding: 5px;
+	display: none;
+}
+.alert-primary{	
+	background-color:#d1ecf1;
+	display: none;
+}
+.profilePanel{
+	font-size: 17px;
+	border-radius: 5px;
+    padding: 10px;
+    background: #f7f7f7;
+    margin-top: 20px;
+    border: 1px #dcdcdc solid;
+    margin-right: 15px;
+}
