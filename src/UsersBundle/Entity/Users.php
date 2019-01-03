@@ -65,26 +65,56 @@ class Users
         $this->conn = $conn;
     }
 
+
     public function getAllUsers(){
 
         if( is_null($this->id) || empty($this->id))
             return [];
 
+        // Get Friends 
+        
+        $res = $this->getFriends();             
+        $frineds = [];
+        foreach ($res AS $k => $val) {
+            $frineds[] = $val['friendId'];
+        }
+
+        // Get all users        
         $query = "SELECT * FROM users WHERE id != ".$this->id;
         $statement = $this->conn->getConnection()->prepare($query);
         $statement->execute();
         $result = $statement->fetchAll();
+        
+        if( count($result) ){
+            
+            foreach ($result AS $key => $value) {
+               $value['isFriend'] =  (in_array($value['id'],$frineds))? true:false ;
+               $result[$key] =  $value;
+
+            }
+        }
+        
         return $result;
     }
 
-    public function getHobbies(){
+    public function getHobbies($userId=null,$sqlWhere = array()){
         if( is_null($this->id) || empty($this->id))
             return [];
 
-        $query = "SELECT * FROM hobbies WHERE userId = ".$this->id;
+        $userId = (!is_null($userId))? $userId:$this->id;
+        $query = "SELECT * FROM hobbies 
+                  WHERE userId = ".$userId;
+        
+        if(count($sqlWhere)){
+            $query .=" AND ".implode(' AND', $sqlWhere);
+            
+        }
+
+
         $statement = $this->conn->getConnection()->prepare($query);
         $statement->execute();
         $result = $statement->fetchAll();
+
         return $result;
     }
 
@@ -92,13 +122,107 @@ class Users
         if( is_null($this->id) || empty($this->id))
             return false;
         $em = $this->getConn();
+
+        $friends = $this->getFriends();
+
+        // Delete the first in first out friend
+        if( count($friends) ==  5 ){
+            $query = " DELETE FROM friends 
+                       WHERE friendId =".$friends[0]['friendId']." AND myId=".$this->id;
+            $statement = $this->conn->getConnection()->prepare($query);
+            $statement->execute();
+        }
+
         $newFriend = new friends();
         $newFriend->setFriendId($friendId);
         $newFriend->setMyId($this->id);
+        $newFriend->setDateCreated(new \DateTime('now'));
         $em->persist($newFriend);
         $em->flush();
         return true;
     }
+
+    public function getFriends($customId = null,$sqlWhere = array()){
+        if( is_null($this->id) || empty($this->id))
+            return [];
+          // Get Friends 
+        $userId = (!is_null($customId))? $customId:$this->id;
+        $query = "SELECT friendId,users.name
+                  FROM friends 
+                  INNER JOIN users on users.id = friends.friendId
+                  WHERE myId = ".$userId;
+        if(count($sqlWhere))
+            $query.= " AND ".implode(' AND ',$sqlWhere);
+
+        $statement = $this->conn->getConnection()->prepare($query);
+        $statement->execute();
+        return $statement->fetchAll();             
+    }
+
+    public function getPotentialUser(){
+        die('dfjnkn');
+        $birthday = $this->getBirthday();
+        $friends = [];
+        $plus5Days = date('Y-m-d H:i:s',strtotime($birthday->format('Y-m-d').' + 5 days'));
+        $minus5Days = date('Y-m-d H:i:s',strtotime($birthday->format('Y-m-d').' - 5 days'));
+        $sqlWhere[] = " users.birthday >= '{$minus5Days}'"; 
+        $sqlWhere[] = " users.birthday <= '{$plus5Days}'"; 
+        $friends = $this->getFriends(null,$sqlWhere);
+
+        if(count($friends)){
+            
+            $myHobbies = $this->getHobbies();
+            if( !count($myHobbies)){
+
+                echo "";
+            }
+            $tempHobbies = [];
+            foreach ($myHobbies as $key => $value) {
+                $tempHobbies[] = $value['hobby'];
+            }
+
+            $sqlWhere = [];
+            for ($i=0;count($friends);$i++) {
+
+                $sqlWhere[] = " hobbies.hobby in ( '".implode("','", $tempHobbies)."' )";
+                
+                
+                $hobbies = $this->getHobbies($friends[$i]['friendId'],$sqlWhere);
+
+                if( !count($hobbies) )
+                    unset($friends[$i]);
+
+                unset($sqlWhere[0]);
+                
+            }
+
+        }
+       
+        return $friends;
+
+    }
+
+    public function getFriendsByNearBirth($id,&$childs){
+
+        $minus2Week = date('Y-m-d H:i:s',strtotime('-2 weeks'));
+        $plus2Week = date('Y-m-d H:i:s',strtotime('+2 weeks'));
+        $sqlWhere[] = " users.birthday >= '{$minus2Week}'"; 
+        $sqlWhere[] = " users.birthday <= '{$plus2Week}'"; 
+        
+        $childres = $this->getFriends($id,$sqlWhere);
+
+        if(count($childres) > 0){
+            
+            foreach ($childres AS $key => $value) {
+
+                $childs[] = array('id'=>$id,'childs'=>$childres);
+            }
+        }
+
+        return $childs;
+
+    }
+
 
     /**
      * Get the password of the user.

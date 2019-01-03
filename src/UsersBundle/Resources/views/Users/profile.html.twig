@@ -39,13 +39,17 @@
                         <li> 
                             <div class="holderUser">
                             {{ u.name}}  
+
                             <span style="display:none" 
                             friendId="{{u.id}}" 
                             myId="{{user.id}}"></span> 
-                            <i class="fa fa-plus" aria-hidden="true"></i>
 
-                            <i class="fa fa-users" aria-hidden="true"></i>
-
+                            {% set show = (u.isFriend)? 'none':'block' %}
+                                
+                                <i style="display:{{(u.isFriend)? 'block':'none'}}" class="fa fa-users" aria-hidden="true"></i>
+                                
+                                <i style="display:{{(u.isFriend)? 'none':'block'}}" class="fa fa-plus" aria-hidden="true"></i>
+                            
                             </div>
                         </li>
                     {% endfor %}            
@@ -54,11 +58,70 @@
                 {% endif %}
             </div>
 
+             <div class="col-lg-3 profilePanel" >
+                <h2>My Friends</h2>
+                <button id="bringMyFriend" class="btn btn-primary">Show My Friends</button>
+                <div id="showList">
+
+                </div>
+            </div>
         </div>
+        <div class="row">
+            <div class="col-lg-4 profilePanel">
+                <h2>Show birthdays</h2>
+                <button id="showBirthday" class="btn btn-primary">Show Birthday Pepole</button>
+                <div id="showBirthdayList">
+
+                </div>              
+            </div>
+
+            <div class="col-lg-4 profilePanel">
+                <h2>Show potential friends</h2>
+                <button id="showPotential" class="btn btn-primary">Show Birthday Pepole</button>
+                <div id="showPotentialList">
+
+                </div>              
+            </div>
+        </div>
+        
     </div>
 
     <script type="text/javascript">
          $(document).ready(function(){
+            
+            
+            $("#showPotential").on('click',function(){
+                $.ajax({
+                    url:"{{path('show_potential')}}",
+                    type:'post',
+                    dataType:'html',
+                    success:function(data ){
+                        //$("#showList").html(data);
+                    }
+                });
+            });
+            $("#showBirthday").on('click',function(){
+                $.ajax({
+                    url:"{{path('get_birthday_pepole')}}",
+                    type:'post',
+                    dataType:'html',
+                    success:function(data ){
+                        //$("#showList").html(data);
+                    }
+                });
+            });
+
+            $("#bringMyFriend").on('click',function(){
+                $.ajax({
+                    url:"{{path('get_my_Friends')}}",
+                    type:'post',
+                    dataType:'html',
+                    success:function(data ){
+                        $("#showList").html(data);
+                    }
+                });
+            });
+
             $(".fa-plus").on('click',function(){
                 
                 var data = $(this).siblings()[0];
@@ -70,7 +133,15 @@
                     type:'post',
                     dataType:'json',
                     success:function(data ){
+                        
+                        if(data.status === true){
+                            var element = $("span[friendId='"+data.friendId+"'][myId='"+data.myUserId+"']");
+                            
+                            $(element.siblings()[0]).show();
+                            $(element.siblings()[1]).hide();
+                        }else{
 
+                        }
                     }
                 });
             });

@@ -103,9 +103,9 @@ class UsersController extends Controller
      */
     public function profileAction(Request $request){
 
-        if( empty( $this->get('session')->get('userId'))  ){
-            
-            return $this->redirect('/');
+        if( empty( $this->get('session')->get('userId') ) || is_null($this->get('session')->get('userId'))  ){
+            echo "need to return to login page";
+            //return $this->redirect('/');
         }
         
         $userId = (int) $this->get('session')->get('userId');
@@ -116,6 +116,7 @@ class UsersController extends Controller
         $user->setConn($em);
 
         $hobbies = $user->getHobbies();
+
         $allUsers = $user->getAllUsers();
 
         return $this->render('UsersBundle:users:profile.html.twig',
@@ -128,13 +129,72 @@ class UsersController extends Controller
     }
 
     /**
+     * @Route("/get-my-Friends", name="get_my_Friends")
+     */
+    public function getMyFriendsAction(Request $request){
+        $em = $this->getDoctrine()->getManager();
+        $userId = (int) $this->get('session')->get('userId');
+        $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
+
+        $user->setConn($em);
+        $friends = $user->getFriends();
+        $html = '';
+        if(count($friends)){
+            $html.='<ul>';
+            foreach ( $friends as $key => $value) {
+                $html.='<li>'.$value['name'].'</li>';
+            }
+            $html.='</ul>';
+        }
+
+        die($html);   
+    }
+
+    /**
+     * @Route("/get-birthday-pepole", name="get_birthday_pepole")
+     */
+    public function getBirthdayPepoleAction(Request $request){
+        $em = $this->getDoctrine()->getManager();
+        $userId = (int) $this->get('session')->get('userId');
+        $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
+        $tree = [];
+        $user->setConn($em);
+        $user->getFriendsByNearBirth($userId,$tree);
+        VarDumper::dump($tree);
+        die('in');
+        // $html = '';
+        // if(count($friends)){
+        //     $html.='<ul>';
+        //     foreach ( $friends as $key => $value) {
+        //         $html.='<li>'.$value['name'].'</li>';
+        //     }
+        //     $html.='</ul>';
+        // }
+
+        // die($html);   
+    }
+
+    /**
+     * @Route("/show-potential", name="show_potential")
+     */
+    public function showPotentialAction(Request $request){
+        
+        $em = $this->getDoctrine()->getManager();
+        $userId = (int) $this->get('session')->get('userId');
+        $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
+        $tree = [];
+        $user->setConn($em);
+        $friends =$user->getPotentialUser();
+    }
+
+    /**
      * @Route("/Add-friend", name="AddFriend")
      */
     public function AddFriendAction(Request $request){
         $em = $this->getDoctrine()->getManager();
         $requiredFields = ['friendId'];
         $data = $request->request->all(); 
-        $json = ['status'=>true,'message'=>''];
+        $json = ['status'=>true,'message'=>'','friendId'=>'','myUserId'=>''];
         foreach ($requiredFields AS $key => $value) {
             
             if(empty($data[$value])){
@@ -148,8 +208,10 @@ class UsersController extends Controller
         $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
         $user->setConn($em);
         $answer = $user->AddFriend((int) $data['friendId']);
-        $json['status'] = false;
+        $json['status'] = $answer;
+        $json['friendId'] = (int) $data['friendId'];
+        $json['myUserId'] = (int) $userId;
         
-        die('in');
+        die(json_encode($json));
     }
 }

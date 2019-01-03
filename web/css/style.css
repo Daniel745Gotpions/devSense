@@ -35,8 +35,11 @@
 		color: #3ab6f5;
 		float: right;
 }
-.fa-users{
-	
+.fa-users{	
 	color:#2eaf28;
 	float: right;
+}
+
+div#showList {
+    margin-top: 10px;
 }
