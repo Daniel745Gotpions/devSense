@@ -14,6 +14,7 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-4 profilePanel" >
+
                 <h2>Personal Details</h2>    
                 <div>Name:  {{user.name}}</div>
                 <div>Birthday {{ user.birthday|date("m/d/Y") }}</div>
@@ -155,10 +156,18 @@
                     success:function(data ){
                         
                         if(data.status === true){
+
                             var element = $("span[friendId='"+data.friendId+"'][myId='"+data.myUserId+"']");
                             
                             $(element.siblings()[0]).show();
                             $(element.siblings()[1]).hide();
+                            if(data.deleted){
+                                var deletedId = parseInt(data.deletedId);
+
+                            var elementDeleted = $("span[friendId='"+deletedId+"'][myId='"+data.myUserId+"']");
+                                $(elementDeleted.siblings()[0]).hide();
+                                $(elementDeleted.siblings()[1]).show();
+                            }
                         }else{
 
                         }

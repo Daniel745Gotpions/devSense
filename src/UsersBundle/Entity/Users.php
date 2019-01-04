@@ -135,7 +135,7 @@ class Users
 
     public function addFriend($friendId){
         if( is_null($this->id) || empty($this->id))
-            return false;
+            return ['status'=>false,'deleted'=>0,'friendId'=>0];
         $em = $this->getConn();
 
         $friends = $this->getFriends();
@@ -146,6 +146,9 @@ class Users
                        WHERE friendId =".$friends[0]['friendId']." AND myId=".$this->id;
             $statement = $this->conn->getConnection()->prepare($query);
             $statement->execute();
+            $respond = ['status'=>true,'deleted'=>1,'friendId'=>$friends[0]['friendId']];
+        }else{
+            $respond = ['status'=>true,'deleted'=>0,'friendId'=>$friends[0]['friendId']];
         }
 
         $newFriend = new friends();
@@ -154,7 +157,7 @@ class Users
         $newFriend->setDateCreated(new \DateTime('now'));
         $em->persist($newFriend);
         $em->flush();
-        return true;
+        return $respond;
     }
 
     public function getFriends($customId = null,$sqlWhere = array()){

@@ -102,7 +102,7 @@ class UsersController extends Controller
      * @Route("/profile", name="profile")
      */
     public function profileAction(Request $request){
-        
+
         if( empty( $this->get('session')->get('userId') ) || is_null($this->get('session')->get('userId'))  ){
             return $this->redirect('/');
         }
@@ -208,9 +208,9 @@ class UsersController extends Controller
         $tree = [];
         $user->setConn($em);
         $friends =$user->getPotentialUser();
-        $outPut = '';
+        $outPut = 'No Result Exist';
         if( count($friends) ){
-            $outPut.="<ul style='margin-top: 10px;'>";
+            $outPut ="<ul style='margin-top: 10px;'>";
             foreach ($friends AS $key => $value) {
                 $outPut.="<li>".$value['name']."</li>";
             }
@@ -240,10 +240,12 @@ class UsersController extends Controller
         $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
         $user->setConn($em);
         $answer = $user->AddFriend((int) $data['friendId']);
-        $json['status'] = $answer;
+
+        $json['status'] = $answer['status'];
         $json['friendId'] = (int) $data['friendId'];
         $json['myUserId'] = (int) $userId;
-        
+        $json['deleted'] = $answer['deleted'];
+        $json['deletedId'] = $answer['friendId'];
         die(json_encode($json));
     }
 }
