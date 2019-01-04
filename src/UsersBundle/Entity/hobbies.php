@@ -28,30 +28,7 @@ class hobbies
      */
     private $hobby;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="userId", type="integer")
-     */
-    protected $userId;
-   
-    /**
-     * @param integer $userId
-     */
-    public function setUserId($userId)
-    {
-        $this->userId = $userId;
-    }
-
-    /**
-     *
-     * @return int
-     */
-    public function getUserId()
-    {
-        return $this->userId;
-    }
-
+    
     /**
      * Get id
      *

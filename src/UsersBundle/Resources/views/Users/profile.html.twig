@@ -37,7 +37,7 @@
                     <ul>
                     {% for u in allUsers %}
                         <li> 
-                            <div class="holderUser">
+                            
                             {{ u.name}}  
 
                             <span style="display:none" 
@@ -50,7 +50,7 @@
                                 
                                 <i style="display:{{(u.isFriend)? 'none':'block'}}" class="fa fa-plus" aria-hidden="true"></i>
                             
-                            </div>
+                            
                         </li>
                     {% endfor %}            
 

@@ -115,13 +115,14 @@ class Users
             return [];
 
         $userId = (!is_null($userId))? $userId:$this->id;
-        $query = "SELECT * FROM hobbies 
-                  WHERE userId = ".$userId;
+        $query = "SELECT * FROM users 
+                    INNER JOIN usersHobbies ON users.id = usersHobbies.userId
+                    INNER JOIN hobbies ON usersHobbies.hobbyId = hobbies.ID
+                   
+                  WHERE usersHobbies.userId = ".$userId;
         
         if(count($sqlWhere)){
-            $query .=" AND ".implode(' AND', $sqlWhere);
-            
-            
+            $query .=" AND ".implode(' AND', $sqlWhere);  
         }
 
 
@@ -165,8 +166,10 @@ class Users
                   FROM friends 
                   INNER JOIN users on users.id = friends.friendId
                   WHERE myId = ".$userId;
-        if(count($sqlWhere))
+        if(count($sqlWhere)){
             $query.= " AND ".implode(' AND ',$sqlWhere);
+        }
+
 
         $statement = $this->conn->getConnection()->prepare($query);
         $statement->execute();
@@ -186,23 +189,25 @@ class Users
         if(count($friends)){
             
             $myHobbies = $this->getHobbies();
+            
             if( !count($myHobbies)){
 
-                echo "";
+                echo "No hobbies";
             }
 
             $tempHobbies = [];
-            foreach ($myHobbies as $key => $value) {
-                $tempHobbies[] = $value['hobby'];
+            foreach ($myHobbies AS $key => $value) {
+                $tempHobbies[] = $value['hobbyId'];
             }
 
             $sqlWhere = [];
 
             if( count($tempHobbies)){
-
+                
                 for ($i=0;$i < count($friends);$i++) {
 
-                    $sqlWhere[0] = " hobbies.hobby in ( '".implode("','", $tempHobbies)."' )";
+
+                    $sqlWhere[0] = " usersHobbies.hobbyId in ( '".implode("','", $tempHobbies)."' )";
                     
                     
                     $hobbies = $this->getHobbies($friends[$i]['friendId'],$sqlWhere);
@@ -222,9 +227,10 @@ class Users
 
     public function getFriendsByNearBirth($id,&$childs){
         $childs = [];
-        $minus2Week = date('Y-m-d H:i:s',strtotime('-2 weeks'));
+        //$minus2Week = date('Y-m-d H:i:s',strtotime('-2 weeks'));
         $plus2Week = date('Y-m-d H:i:s',strtotime('+2 weeks'));
-        $sqlWhere[] = " users.birthday >= '{$minus2Week}'"; 
+       
+        $sqlWhere[] = " users.birthday >= now()"; 
         $sqlWhere[] = " users.birthday <= '{$plus2Week}'"; 
         
         $childres = $this->getFriends($id,$sqlWhere);
@@ -256,20 +262,24 @@ class Users
     public function sortByDate( $childs = array() ){
         if(!count($childs))
             return $childs;
+        
         // Sorting result
         foreach ($childs AS $key => $value) {
-            foreach ($childs AS $k => $v) {
+            $temp[] = $value;    
+        }
+
+        for($i=0; $i < count($temp); $i++){
+            for($j=$i+1 ; $j < count($temp) ; $j++){
                 
-                if( strtotime($value['birthday']) < strtotime($v['birthday']) ){
-                     
-                    $temp = $childs[$key];    
-                    $childs[$key] = $childs[$k];
-                    $childs[$k] = $temp;
-                    
+                if( strtotime($temp[$i]['birthday']) > strtotime($temp[$j]['birthday'])){
+                        $temporary = $temp[$i];
+                        $temp[$i] = $temp[$j];
+                        $temp[$j] = $temporary ; 
                 }
             }
         }
-
+        
+        $childs = $temp;
         return $childs;
     }
 

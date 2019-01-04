@@ -23,7 +23,7 @@ class UsersController extends Controller
      * @Route("/", name="")
      */
     public function indexAction(){
-			
+		
     	$em = $this->getDoctrine()->getManager();
     	$dataResult = [];
         
@@ -102,7 +102,7 @@ class UsersController extends Controller
      * @Route("/profile", name="profile")
      */
     public function profileAction(Request $request){
-
+        
         if( empty( $this->get('session')->get('userId') ) || is_null($this->get('session')->get('userId'))  ){
             return $this->redirect('/');
         }

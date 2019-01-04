@@ -26,10 +26,7 @@
     border: 1px #dcdcdc solid;
     margin-right: 15px;
 }
-.holderUser{
-    padding: 5px;
-    border-bottom: 1px #d8d8d8 solid;
-}
+
 .fa-plus{
 		cursor: pointer;
 		color: #3ab6f5;
@@ -42,4 +39,19 @@
 
 div#showList {
     margin-top: 10px;
+}
+
+ul {
+	margin-top:10px;
+ 	list-style-type: none;
+    padding: 5px;
+    border-radius: 5px;
+    border: 1px #c3c3c3 solid;
+}
+ul li{
+	padding: 5px;
+	border-bottom: 1px #d8d8d8 solid;
+}
+ul li:last-child {
+  border: 0px;
 }
