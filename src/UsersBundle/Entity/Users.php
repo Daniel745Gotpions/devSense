@@ -256,8 +256,19 @@ class Users
     public function sortByDate( $childs = array() ){
         if(!count($childs))
             return $childs;
-
-        VarDumper::dump($childs);die();
+        // Sorting result
+        foreach ($childs AS $key => $value) {
+            foreach ($childs AS $k => $v) {
+                
+                if( strtotime($value['birthday']) < strtotime($v['birthday']) ){
+                     
+                    $temp = $childs[$key];    
+                    $childs[$key] = $childs[$k];
+                    $childs[$k] = $temp;
+                    
+                }
+            }
+        }
 
         return $childs;
     }

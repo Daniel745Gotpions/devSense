@@ -190,7 +190,7 @@ class UsersController extends Controller
             $html.='<ul>';
             foreach ( $tree AS $key => $value) {
 
-                $html.='<li><p>'.$value['name'].'</p><p>'.$value['birthday'].'</p></li>';
+                $html.='<li>'.$value['name'].' birthday '.date('Y-m-d',strtotime($value['birthday'])).'</li>';
             }
             $html.='</ul>';
         }
