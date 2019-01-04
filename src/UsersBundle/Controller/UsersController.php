@@ -104,7 +104,6 @@ class UsersController extends Controller
     public function profileAction(Request $request){
 
         if( empty( $this->get('session')->get('userId') ) || is_null($this->get('session')->get('userId'))  ){
-            echo "need to return to login page";
             return $this->redirect('/');
         }
         
