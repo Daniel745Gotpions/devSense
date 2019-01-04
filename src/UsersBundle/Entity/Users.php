@@ -148,7 +148,7 @@ class Users
             $statement->execute();
             $respond = ['status'=>true,'deleted'=>1,'friendId'=>$friends[0]['friendId']];
         }else{
-            $respond = ['status'=>true,'deleted'=>0,'friendId'=>$friends[0]['friendId']];
+            $respond = ['status'=>true,'deleted'=>0,'friendId'=>0];
         }
 
         $newFriend = new friends();
