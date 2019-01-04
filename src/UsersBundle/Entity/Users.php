@@ -97,6 +97,19 @@ class Users
         return $result;
     }
 
+    public function getUsersBetweenDates(){
+        if( is_null($this->id) || empty($this->id))
+            return [];
+        $yearEnd = date('Y-m-d', strtotime('Dec 31'));
+        $now = date('Y-m-d H:i:s');
+        $query = "SELECT * FROM users WHERE id != ".$this->id." AND birthday BETWEEN '{$now}' AND '{$yearEnd} 00:00:00' ";
+        
+        $statement = $this->conn->getConnection()->prepare($query);
+        $statement->execute();
+        return $statement->fetchAll();
+
+    }
+
     public function getHobbies($userId=null,$sqlWhere = array()){
         if( is_null($this->id) || empty($this->id))
             return [];
@@ -107,6 +120,7 @@ class Users
         
         if(count($sqlWhere)){
             $query .=" AND ".implode(' AND', $sqlWhere);
+            
             
         }
 
@@ -147,7 +161,7 @@ class Users
             return [];
           // Get Friends 
         $userId = (!is_null($customId))? $customId:$this->id;
-        $query = "SELECT friendId,users.name
+        $query = "SELECT friendId,users.name,users.birthday
                   FROM friends 
                   INNER JOIN users on users.id = friends.friendId
                   WHERE myId = ".$userId;
@@ -160,7 +174,7 @@ class Users
     }
 
     public function getPotentialUser(){
-        die('dfjnkn');
+        
         $birthday = $this->getBirthday();
         $friends = [];
         $plus5Days = date('Y-m-d H:i:s',strtotime($birthday->format('Y-m-d').' + 5 days'));
@@ -176,53 +190,77 @@ class Users
 
                 echo "";
             }
+
             $tempHobbies = [];
             foreach ($myHobbies as $key => $value) {
                 $tempHobbies[] = $value['hobby'];
             }
 
             $sqlWhere = [];
-            for ($i=0;count($friends);$i++) {
 
-                $sqlWhere[] = " hobbies.hobby in ( '".implode("','", $tempHobbies)."' )";
-                
-                
-                $hobbies = $this->getHobbies($friends[$i]['friendId'],$sqlWhere);
+            if( count($tempHobbies)){
 
-                if( !count($hobbies) )
-                    unset($friends[$i]);
+                for ($i=0;$i < count($friends);$i++) {
 
-                unset($sqlWhere[0]);
-                
+                    $sqlWhere[0] = " hobbies.hobby in ( '".implode("','", $tempHobbies)."' )";
+                    
+                    
+                    $hobbies = $this->getHobbies($friends[$i]['friendId'],$sqlWhere);
+
+                 
+                    if( !count($hobbies) )
+                        unset($friends[$i]);
+                }
+              
             }
 
         }
        
         return $friends;
 
-    }
+    }   
 
     public function getFriendsByNearBirth($id,&$childs){
-
+        $childs = [];
         $minus2Week = date('Y-m-d H:i:s',strtotime('-2 weeks'));
         $plus2Week = date('Y-m-d H:i:s',strtotime('+2 weeks'));
         $sqlWhere[] = " users.birthday >= '{$minus2Week}'"; 
         $sqlWhere[] = " users.birthday <= '{$plus2Week}'"; 
         
         $childres = $this->getFriends($id,$sqlWhere);
+        
+        if( count($childres)){
+            foreach ( $childres AS $key => $value) {
+                
+                $childs[$value['friendId']] = array('name'=>$value['name'],
+                    'birthday'=>$value['birthday'],
+                'userId'=>$value['friendId']);
 
-        if(count($childres) > 0){
-            
-            foreach ($childres AS $key => $value) {
+                $tree = $this->getFriends($value['friendId'],$sqlWhere);
 
-                $childs[] = array('id'=>$id,'childs'=>$childres);
-            }
+                if( count($tree)){
+                    foreach ( $tree AS $k => $v) {
+                        if( $id != $v['friendId']){
+                            $childs[$v['friendId']] = array(
+                                'name'=>$v['name'],
+                                'birthday'=>$v['birthday'],
+                                'userId'=>$v['friendId']);    
+                        }            
+                    }
+                }
+            }    
         }
 
-        return $childs;
-
+        return $this->sortByDate($childs);
     }
+    public function sortByDate( $childs = array() ){
+        if(!count($childs))
+            return $childs;
 
+        VarDumper::dump($childs);die();
+
+        return $childs;
+    }
 
     /**
      * Get the password of the user.

@@ -105,7 +105,7 @@ class UsersController extends Controller
 
         if( empty( $this->get('session')->get('userId') ) || is_null($this->get('session')->get('userId'))  ){
             echo "need to return to login page";
-            //return $this->redirect('/');
+            return $this->redirect('/');
         }
         
         $userId = (int) $this->get('session')->get('userId');
@@ -150,6 +150,30 @@ class UsersController extends Controller
         die($html);   
     }
 
+    
+
+    /**
+     * @Route("/get-upcoming-birthday", name="get_upcoming_birthday")
+     */
+    public function getUpcomingBirthdayAction(Request $request){
+        $em = $this->getDoctrine()->getManager();
+        $userId = (int) $this->get('session')->get('userId');
+        $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
+        $user->setConn($em);
+
+        $userList = $user->getUsersBetweenDates();
+        $outPut = '';
+        if(count($userList)){
+            $outPut.="<ul style='margin-top:10px;'>";
+            foreach ($userList AS $k => $v) {
+                $outPut.="<li>".$v['name']."</li>";    
+            }
+            $outPut.="</ul>";
+        }else{
+            $outPut =" No Result ";
+        }
+        die($outPut);
+    }
     /**
      * @Route("/get-birthday-pepole", name="get_birthday_pepole")
      */
@@ -159,19 +183,19 @@ class UsersController extends Controller
         $user = $em->getRepository('UsersBundle:Users')->findOneById($userId);
         $tree = [];
         $user->setConn($em);
-        $user->getFriendsByNearBirth($userId,$tree);
-        VarDumper::dump($tree);
-        die('in');
-        // $html = '';
-        // if(count($friends)){
-        //     $html.='<ul>';
-        //     foreach ( $friends as $key => $value) {
-        //         $html.='<li>'.$value['name'].'</li>';
-        //     }
-        //     $html.='</ul>';
-        // }
+        $tree = $user->getFriendsByNearBirth($userId,$tree);
+        
+        $html = '';
+        if(count($tree)){
+            $html.='<ul>';
+            foreach ( $tree AS $key => $value) {
 
-        // die($html);   
+                $html.='<li><p>'.$value['name'].'</p><p>'.$value['birthday'].'</p></li>';
+            }
+            $html.='</ul>';
+        }
+
+        die($html);   
     }
 
     /**
@@ -185,6 +209,15 @@ class UsersController extends Controller
         $tree = [];
         $user->setConn($em);
         $friends =$user->getPotentialUser();
+        $outPut = '';
+        if( count($friends) ){
+            $outPut.="<ul style='margin-top: 10px;'>";
+            foreach ($friends AS $key => $value) {
+                $outPut.="<li>".$value['name']."</li>";
+            }
+            $outPut.="</ul>";
+        }
+        echo $outPut;die();
     }
 
     /**

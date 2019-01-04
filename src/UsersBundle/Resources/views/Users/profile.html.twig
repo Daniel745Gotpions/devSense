@@ -77,11 +77,20 @@
 
             <div class="col-lg-4 profilePanel">
                 <h2>Show potential friends</h2>
-                <button id="showPotential" class="btn btn-primary">Show Birthday Pepole</button>
+                <button id="showPotential" class="btn btn-primary">Show potential friends</button>
                 <div id="showPotentialList">
 
                 </div>              
             </div>
+
+            <div class="col-lg-3 profilePanel" >
+                <h2>Show upcoming birthdays</h2>
+                <button id="upcomingButton" class="btn btn-primary">Show upcoming birthdays</button>
+                <div id="upcomingList">
+
+                </div>
+            </div>
+            
         </div>
         
     </div>
@@ -90,13 +99,24 @@
          $(document).ready(function(){
             
             
+            $("#upcomingButton").on('click',function(){
+                $.ajax({
+                    url:"{{path('get_upcoming_birthday')}}",
+                    type:'post',
+                    dataType:'html',
+                    success:function(data ){
+                        $("#upcomingList").html(data);
+                    }
+                });
+            });
+
             $("#showPotential").on('click',function(){
                 $.ajax({
                     url:"{{path('show_potential')}}",
                     type:'post',
                     dataType:'html',
                     success:function(data ){
-                        //$("#showList").html(data);
+                        $("#showPotentialList").html(data);
                     }
                 });
             });
@@ -106,7 +126,7 @@
                     type:'post',
                     dataType:'html',
                     success:function(data ){
-                        //$("#showList").html(data);
+                        $("#showBirthdayList").html(data);
                     }
                 });
             });
